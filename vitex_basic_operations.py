@@ -33,10 +33,10 @@ def create_order(amount,api_key,secret_key,price,side,symbol,url):
     print(response.text)
 
 def get_orders(address,url):
-    uurl=url+"s?address="+address
+    url=url+"s?address="+address
     payload={}
     headers={}
-    response = requests.request("GET", uurl, headers=headers, data=payload)
+    response = requests.request("GET", url, headers=headers, data=payload)
     print(response.text)
 
 secret_key = ""
