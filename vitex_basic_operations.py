@@ -1,4 +1,4 @@
-#import time
+import time
 import requests
 import hashlib
 #import calendar
@@ -16,11 +16,7 @@ def create_sha256_signature(key, message):
 
 
 def time_stamp():
-
-    presentDate = datetime.datetime.now()
-    timestamp = int(datetime.datetime.timestamp(presentDate))
-    timestamp = timestamp*1000
-    return timestamp
+    return int(time.time()*1000)
 
 
 class vitex:
