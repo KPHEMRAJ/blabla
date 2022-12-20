@@ -10,7 +10,6 @@ def time_stamp():
 
 def create_sha256_sign(key, message):
 
-    #byte_key = binascii.unhexlify(key)
     byte_key = str.encode(key)
     message = message.encode()
     return hmac.new(byte_key, message, hashlib.sha256).hexdigest()
@@ -32,10 +31,8 @@ class coinex:
     url = "https://api.coinex.com/v1/"
 
     def depth(self):
-        payload = {}
-        headers = {}
         url = self.url+"market/depth?market=CETUSDT&merge=0.00001"
-        response = requests.request("GET", url, headers=headers, data=payload)
+        response = requests.request("GET", url)
         print(response.text)
 
     def balance(self):
@@ -44,10 +41,65 @@ class coinex:
         params["tonce"] = str(time_stamp())
         url = self.url+"balance/info?access_id="+self.access_id+"&tonce=" + \
             str(time_stamp())
-        payload = {}
+        
         headers = {"authorization": create_md5_sign(params, self.secret_key)}
-        response = requests.request("GET", url, headers=headers, data=payload)
+        response = requests.request("GET", url, headers=headers)
         print(response.text)
+    
+    def fees(self):
+        url = self.url+"account/market/fee?"
+        params={
+        "access_id":self.access_id,
+        "tonce":str(time_stamp()),
+        "market":"VITEUSDT"
+        }
+        for a in params:
+            url=url+a+'='+params[a]+'&' 
+        url=url[:-1]
+        headers = {"authorization": create_md5_sign(params, self.secret_key)}
+        response = requests.request("GET", url, headers=headers)
+        print(response.text)
+
+    def withdraw(self):
+        url = self.url+"balance/coin/withdraw"
+        data={
+        "access_id": self.access_id,
+        "tonce": str(time_stamp()),
+        "coin_type":"BAN",
+        "coin_address":"ban_3sef57qz717a9z1ochzhrhkiiyeofozhgcfhrspoq8o9m4xaio7kk48jpdwj",
+        "actual_amount":"1001"
+        }
+        headers = {"authorization": create_md5_sign(data, self.secret_key)}
+        response = requests.request("POST", url, headers=headers,json=data)
+        print(response.text)
+    
+    def deposit_address(self):
+        url = self.url+"balance/deposit/address/vite?" + "access_id="+self.access_id+"&tonce="+str(time_stamp())
+        params = {
+            "access_id": self.access_id,
+            "tonce": str(time_stamp())
+        }
+        headers = {"authorization": create_md5_sign(params, self.secret_key)}
+        response = requests.request("GET", url, headers=headers)
+        print(response.text)
+
+    def create_order(self):
+        url = self.url+"order/limit"
+        data = {
+            "access_id": self.access_id,
+            "tonce": str(time_stamp()),
+            "market": "BANUSDT",
+            "type": "sell",
+            "amount": "989",
+            "price": "0.006596"
+        }
+        headers = {"authorization": create_md5_sign(data, self.secret_key)}
+        response = requests.request("POST", url, headers=headers,json=data)
+        print(response.text)
+
+     
+
+        
 
 
 class vitex:
@@ -76,17 +128,20 @@ class vitex:
 
     def get_orders(self):
         url = self.url+"orders?address="+self.address
-
         payload = {}
         headers = {}
         response = requests.request(
             "GET", url, headers=headers, data=payload)
         print(response.text)
 
-
+'''
 v1 = vitex()
 v1.create_order()
-v1.get_orders()
+v1.get_orders()'''
 c1 = coinex()
-c1.depth()
-c1.balance()
+#c1.depth()
+#c1.balance()
+#c1.fees()
+#c1.withdraw()
+#c1.deposit_address()
+#c1.create_order()
