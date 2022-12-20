@@ -36,9 +36,10 @@ class coinex:
         print(response.text)
 
     def balance(self):
-        params = {}
-        params["access_id"] = self.access_id
-        params["tonce"] = str(time_stamp())
+        params = {
+        "access_id":self.access_id,
+        "tonce":str(time_stamp())
+        }
         url = self.url+"balance/info?access_id="+self.access_id+"&tonce=" + \
             str(time_stamp())
         
@@ -97,11 +98,17 @@ class coinex:
         response = requests.request("POST", url, headers=headers,json=data)
         print(response.text)
 
-     
+    def is_maintanace(self):
+        url=self.url+"common/maintain/info"
+        response = requests.request("GET", url)
+        print(response.text)
+        url=self.url+"common/temp-maintain/info"
+        response = requests.request("GET", url)
+        print(response.text)
+
+
 
         
-
-
 class vitex:
 
     secret_key = ""
@@ -126,18 +133,46 @@ class vitex:
             "POST", url, headers=headers, data=payload)
         print(response.text)
 
-    def get_orders(self):
+    def order_history(self):
         url = self.url+"orders?address="+self.address
         payload = {}
         headers = {}
         response = requests.request(
             "GET", url, headers=headers, data=payload)
         print(response.text)
+    
+    def depth(self):
+        url = self.url+"depth"
+        params = {"symbol": "VITE_USDT-000"}
+        response = requests.request("GET", url, params=params)
+        print(response.text)
+    
+    def order_limit(self):
+        url=self.url+"limit"
+        response = requests.request("GET", url)
+        print(response.text)
+        dict=response.json()
+        data=dict["data"]
+        minAmount=data["minAmount"]
+        print(minAmount["USDT-000"])
 
-'''
+    def exchange_balance(self):
+        url = self.url+"balance"
+        params = {
+            "address": "vite_d4d963fa23f035b11d529f1fffd9606706a057f2e93131f123"}
+        response = requests.request("GET",url,params=params)
+        print(response.text)
+
+
+
+
+
 v1 = vitex()
-v1.create_order()
-v1.get_orders()'''
+#v1.create_order()
+#v1.order_history()
+#v1.depth()
+#v1.order_limit()
+#v1.exchange_balance()
 c1 = coinex()
 #c1.depth()
 #c1.balance()
@@ -145,3 +180,4 @@ c1 = coinex()
 #c1.withdraw()
 #c1.deposit_address()
 #c1.create_order()
+#c1.is_maintanace()
