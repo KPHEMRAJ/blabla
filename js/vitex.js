@@ -1,4 +1,5 @@
 const CryptoJS= require("crypto-js");
+const {cancel_order} = require('./cancel_order.js');
 
 
 
@@ -55,7 +56,7 @@ fetch(vitex.url+"order", requestOptions)
 
 address={
     vite: {
-    "hem":"vite_d4d963fa23f035b11d529f1fffd9606706a057f2e93131f123"}
+    "hem":"vite_53376e73f8cad15002c9ef4d5a7e96ceee13f7150dc18e7965"}
 }
 pair={
     vitex:{
@@ -66,4 +67,5 @@ let v1=vitex
 //v1.get_orders(address.vite["hem"])
 //v1.get_depth(pair.vitex["vitc"])
 //v1.get_exchange_balance(address.vite["hem"]);
-v1.post_order(1000,0.1,0,"BAN-001_VITE")
+//v1.post_order(1000,0.1,0,"BAN-001_VITE")
+cancel_order("499035d1a8564f65201d1aff6488877d34a435d3e3d68de0951d2254e1e73137","tti_f9bd6782f966f899d74d7df8")
