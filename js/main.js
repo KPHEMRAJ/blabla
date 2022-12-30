@@ -2,6 +2,7 @@ const {cancel_order} = require('./cancel_order.js');
 const {get_depth,get_orders,get_exchange_balance,post_order}=require('./vitex.js')
 const {sleep}=require('./sleep.js')
 const {discord_bot}=require('./discord_api')
+const {liquidity}=require('./get_liquidity.js')
 symbol={
  "vitc":"VITC-000_VITE"
 }
@@ -86,14 +87,21 @@ async function delete_order(order_id,token_id)
 { cancel_order(order_id,token_id);
     modify(order_id,token_id);
 }
-
+async function vitcswap_liquidity()
+{ let d=await liquidity()
+ let x=d[0]//token
+ let y=d[1]//vite
+ let k=d[2]//x*y
+ console.log(x,y,k)
+}
 async function main()
 {
     //let order_id=await orders()
     //console.log(order_id)
    // delete_order(order_id,"tti_f9bd6782f966f899d74d7df8")
-   let data=await create_order(1000,0.1,0,"BAN-001_VITE")
+   //let data=await create_order(1000,0.1,0,"BAN-001_VITE")
  //console.log(data)
+ vitcswap_liquidity()
  
     
 }
