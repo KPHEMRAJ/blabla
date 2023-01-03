@@ -91,3 +91,5 @@ const get_liquidity={
         "stateMutability": "view",
         "type": "function"
     }
+
+module.exports={get_conversion,get_liquidity,swap}
