@@ -31,7 +31,10 @@ async function foo()
 {
     let data=await cancel_order("626ceed9b2d5c08164a9f95996770aae8fe2a48d8f84a40880ed64031f9a5c51","tti_f9bd6782f966f899d74d7df8")
     if(data!=undefined)
-    console.log(data.error)
+    {if(data.error!=undefined)
+    console.log(data.error);
+    else
+    console.log(data)}
     
 }
 foo()
