@@ -32,7 +32,10 @@ let amount=1
  amount=amount.toString();
     let data=await send(from,to,token_id,amount);
     if(data!=undefined)
-console.log(data)
+    {if(data.error!=undefined)
+    console.log(data.error)
+    else
+console.log(data)}
 }
 foo()
 */
