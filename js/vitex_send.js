@@ -1,10 +1,9 @@
 
-const {
-    accountBlock, ViteAPI, wallet
-} = require('@vite/vitejs');
-const {HTTP_RPC } = require('@vite/vitejs-http')
-const {abi} =require('@vite/vitejs');
+const {accountBlock, ViteAPI,abi} = require('@vite/vitejs');
+const {HTTP_RPC } = require('@vite/vitejs-http');
+const { data } = require('config-json');
 const viteProvider =new ViteAPI(new HTTP_RPC("https://node.vite.net/gvite"), () => {})
+async function vitex_send(from,to,token_id,amount){
 result=abi.encodeFunctionCall({
 	'type': 'function', 'name': 'DexFundUserDeposit', 'inputs': [] 
     });
@@ -13,15 +12,36 @@ const AccountBlock = accountBlock.AccountBlock;
 
 const myAccountBlock = new AccountBlock({
     blockType: 2,
-    address: 'vite_21dac1fcb30529ee238e67b429459cb56ef34fc023dc724b67',
-    toAddress: 'vite_0000000000000000000000000000000000000006e82b8ba657',
-    tokenId: 'tti_5649544520544f4b454e6e40',
-    amount: '1',
+    address: from,
+    toAddress:to,
+    tokenId: token_id,
+    amount: amount,
     data:base_64
 });
-myAccountBlock.setProvider(viteProvider).setPrivateKey('passphrase in hex');
-myAccountBlock.autoSend().then(data => {
-    console.log('success', data);
-}).catch(err => {
-    console.warn(err);
-});
+myAccountBlock.setProvider(viteProvider).setPrivateKey('private key in hex');
+let data=myAccountBlock.autoSend()
+try{
+    await data;
+}
+catch(e)
+{
+    return e;
+}
+}
+module.exports={vitex_send}
+/*
+const {vitex_send}=require('./vitex_send.js')
+async function foo()
+{let from="vite_53376e73f8cad15002c9ef4d5a7e96ceee13f7150dc18e7965";
+let to="vite_0000000000000000000000000000000000000006e82b8ba657";
+let token_id="tti_5649544520544f4b454e6e40";
+let amount=1
+ amount=amount.toString();
+    let data=await vitex_send(from,to,token_id,amount);
+     if(data!=undefined)
+    {if(data.error!=undefined)
+    console.log(data.error)
+    else
+console.log(data)}
+}
+foo();*/
