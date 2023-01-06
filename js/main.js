@@ -31,7 +31,6 @@ async function depth(side){
 }
 async function create_order(amount,price,side,pair){
 let data=await post_order(amount,price,side,pair);
-console.log(data)
 code=data.code
 message=data.msg
 if(code!=0)
@@ -39,14 +38,6 @@ if(code!=0)
 return}
 data=data.data
 order_id=data.orderId
-if(side===0&&vitc_arb.buy1===null)
-    vitc_arb.buy1=order_id
-else if(side==0&&vitc_arb.buy2==null)
-vitc_arb.buy2=order_id
-else if(side==1&&vitc_arb.sell1==null)
-vitc_arb.sell1=order_id
-else if(side==1&&vitc_arb.sell2==null)
-vitc_arb.sell2=order_id
 return order_id
 }
 async function exchange_balance(token)
@@ -91,13 +82,27 @@ async function modify(order_id,token_id)
 }
 }
 async function delete_order(order_id,token_id)
-{ cancel_order(order_id,token_id);
-    modify(order_id,token_id);
+{ await cancel_order(order_id,token_id);
+    //modify(order_id,token_id);
 }
 async function best_price_swap(side,vitex_price,bal)
 { 
 let data=await bswap(side,vitex_price,bal)
 return data;
+}
+async function vitc_swap1(amount)
+{
+let from="vite_53376e73f8cad15002c9ef4d5a7e96ceee13f7150dc18e7965";
+let to="vite_d4d963fa23f035b11d529f1fffd9606706a057f2e93131f123";
+let token_id=token_id["vitc"]
+amount=amount*(10**18)
+amount=amount.toString();
+let data=await vitc_swap(from,to,token_id,amount);
+if(data!=undefined)
+    {if(data.error!=undefined)
+    console.log(data.error)
+    else
+console.log(data)}
 }
 async function main()
 {let status,data,bal,last_price=0,buy_depth;
@@ -108,7 +113,7 @@ async function main()
             status=await get_status(vitc_arb.buy1);
             if(status[0]==4||status[0]==5)
             {   await delete_order(vitc_arb.buy1,token_id.vitc)
-                //sell status[1] worth in vitcswap
+                await vitc_swap1(status[1])
                 vitc_arb.buy1=null
                 //equalise vitc and vite
             }
@@ -124,17 +129,19 @@ async function main()
             if(vitc_arb.buy1!=null)
             {await delete_order(vitc_arb.buy1,token_id.vitc)
             vitc_arb.buy1=null
-            //create vitex buy order
-            //vitc_arb.buy1=buy_order_id
-            //last price=order price
+            let order_id=await create_order(data[0],data[1],0,"VITC-000_VITE")
+            vitc_arb.buy1=order_id
+            last_price=data[1]
         }
         //step 3
-        if(vitc_arb.buy1!=null//&& my order position is changed
-        )
-        //delete order 
+        buy_depth=await depth(0);
+        for( i in buy_depth)
+        buy_depth[i]=parseFloat(buy_depth[i])
+        if(vitc_arb.buy1!=null&&buy_depth[pos]>last_price)
+       { //delete order 
         //create order
         //update vitc_arb.buy1
-
+       }
 
     
 }}
