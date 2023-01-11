@@ -16,8 +16,17 @@ function toint(n)
         a=BigInt(a)
     return n/a
 }
-async function bswap(side,vitex_price,bal,last_price)
-{  if(bal<52)
+async function bswap(side,vitex_price,bal)
+{  if(bal==1)
+    {
+    let data=await liquidity();
+    let x=BigInt(data[0]);
+    let y=BigInt(data[1]);
+    let k=BigInt(data[2]);
+    return y/x
+    }
+    
+    if(bal<52)
     return 0
     let data=await liquidity();
     let x=BigInt(data[0]);
@@ -32,10 +41,7 @@ let price
     {  price=vitex_price[j]
        price=price+0.000001 
        pr=price
-       if(pr==last_price)
-       return 0
        price=price*10036/10000;
-       console.log(price)
         min_vitc=51/price;
         min_vitc=tobase(min_vitc)
         min_vitc=min_vitc.toLocaleString('fullwide', {useGrouping:false})
@@ -82,7 +88,7 @@ let price
          break
             profit=last_profit
         }
-        return [last_min_vitc,pr,last_vitex_volume,last_ydash]
+        return [last_min_vitc,pr,last_vitex_volume,last_ydash,j]
     }
  } 
 
