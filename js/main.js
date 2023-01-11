@@ -52,13 +52,7 @@ async function exchange_balance(token)
 }
 async function get_status(order_id)
 {
-let order=await get_orders(address.hem)
-let data=order.data.order
-for(i in data)
-{  
-    if(data[i].orderId==order_id)
-    return [data[i].status,data[i].executedQuantity]
-}
+
 }
 
 async function delete_order(order_id,token_id)
@@ -122,15 +116,25 @@ async function main()
     while(1){
         //case1 :if old order is partially or completly filled
         if(vitc_arb.buy1!=null)
-        {
-            status=await get_status(vitc_arb.buy1);
+        {let order=await get_orders(address.hem)
+             let data=order.data.order
+          for(i in data)
+          {   
+          if(data[i].orderId==vitc_arb.buy1)
+            {   
+                status=[data[i].status,data[i].executedQuantity]
+                break;}
+            }
+            
             if(status[0]==4||status[0]==5)
             { 
                 await delete_order(vitc_arb.buy1,token_id.vitc)
+                await sleep(2000)
                 await vitc_swap1(status[1])
                 vitc_arb.buy1=null
                 let vitc_balex= await exchange_balance("VITC-000")
-                let vitc_bal=get_bal(token_id["vitc"])
+                let vitc_bal=await get_bal(token_id["vitc"])
+                vitc_bal=vitc_bal/(10**18)
                 let vitc_mid=(vitc_balex+vitc_bal)/2
                 if(vitc_balex>vitc_mid)
                 await dex_to_main(vitc_balex-vitc_mid,"vitc")
@@ -138,7 +142,8 @@ async function main()
                 await main_to_dex(vitc_bal-vitc_mid,"vitc")
                 //await dex_to_main(vitc_bal,"vitc")
                 let vite_balex= await exchange_balance("VITE")
-                let vite_bal=get_bal(token_id["vite"])
+                let vite_bal=await get_bal(token_id["vite"])
+                vite_bal=vite_bal/(10**18)
                 let vite_mid=(vite_balex+vite_bal)/2
                 if(vite_balex>vite_mid)
                  await dex_to_main(vite_balex-vite_mid,"vite")
@@ -146,7 +151,7 @@ async function main()
                 await main_to_dex(vite_bal-vitc_mid,"vite")    
             }
         }
-        //step 2: check if price has been changed on vitcswap
+        //case 2: check if price has been changed on vitcswap
         bal= await exchange_balance("VITE")
         depth=await get_depth(symbol.vitc)
          data=depth.data
@@ -164,16 +169,23 @@ async function main()
         if(data!=0)
         { data[0]=data[0].toFixed(6)
             data[1]=data[1].toFixed(6)
-            if(vitc_arb.buy1!=null)
+            vitc_bal=await get_bal(token_id["vitc"])
+            vitc_bal=vitc_bal/(10**18)
+            data[0]=Math.min(data[0],vitc_bal)//amount in order must never be greater than wallet balance
+            //what if min of these doesnt satisfy min order amount?
+            if(data[1]*data[0]<=50)
+                console.log('min not satisfied')
+            else if(vitc_arb.buy1!=null)
             {
                 await delete_order(vitc_arb.buy1,token_id.vitc)
             vitc_arb.buy1=null
+            await sleep(2000)
             let order_id=await create_order(data[0],data[1],0,"VITC-000_VITE")
             vitc_arb.buy1=order_id
             last_price=data[1]
             parseInt(data[4])
             pos=data[4]
-            sleep(1000)
+            await sleep(2000)
         }
         else{
             let order_id=await create_order(data[0],data[1],0,"VITC-000_VITE")
@@ -181,19 +193,35 @@ async function main()
             last_price=data[1]
             parseInt(data[4])
             pos=data[4]
-            sleep(1000)
+            await sleep(2000)
         }}
-        //step 3
+        //case 3:checking if order position has been changed
+        depth=await get_depth(symbol.vitc)
+         data=depth.data
+        bids=data.bids
+         buy_depth=[bids[0][0],bids[1][0],bids[2][0],bids[3][0],bids[4][0]]
+        for( i in buy_depth)
+        buy_depth[i]=parseFloat(buy_depth[i])
        if(vitc_arb.buy1!=null)
-        {console.log(buy_depth[pos]+0.000001,last_price)//issue 
-        if(buy_depth[pos]+0.000001!=last_price)
-       { console.log('hi')
+        {console.log((buy_depth[pos]).toFixed(6),last_price)
+        if((buy_depth[pos]).toFixed(6)!=last_price)
+       { 
          await delete_order(vitc_arb.buy1,token_id.vitc)
-         //
+         await sleep(2000)
+           bal= await exchange_balance("VITE")
+           data=await best_price_swap(0,buy_depth,bal-5)
+        if(data!=0)
+        { data[0]=data[0].toFixed(6)
+            data[1]=data[1].toFixed(6)}
+            console.log(data)
         let order_id=await create_order(data[0],data[1],0,"VITC-000_VITE")
             vitc_arb.buy1=order_id
             last_price=data[1]
+            parseInt(data[4])
+            pos=data[4]
+            await sleep(2000)
        }}
+       //case 4: the difference bw my order and nearest next order is greater than the lowest possible value
     }
   /*if(vitc_arb.sell!=null)
         {
